@@ -61,17 +61,21 @@ namespace APRS2SN
         }
       }
     }
+    private void APRS2SN_FormClosing(object sender, FormClosingEventArgs e)
+    {
+      Cleanup();
+    }
     #endregion
 
     #region Control events
     private void btnStart_Click(object sender, EventArgs e)
     {
-      if(chkLog.Checked)
+      if (chkLog.Checked)
       {
         oLogging = new Logging($"{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}_APRS2SN.log");
         bLogAll = cbLogLevel.Text.Equals("All");
       }
-        
+
       chkLog.Enabled = false;
       cbLogLevel.Enabled = false;
       btnStart.Enabled = false;
@@ -104,11 +108,8 @@ namespace APRS2SN
 
     private void btnStop_Click(object sender, EventArgs e)
     {
-      bRunUpdate = false;
-      Thread.Sleep(1000);
-      thAPRSThread.Join(1000);
-      tcpClient.Close();
-      
+      Cleanup();
+
       btnStart.Enabled = true;
       btnStop.Enabled = false;
       chkLog.Enabled = true;
@@ -160,44 +161,47 @@ namespace APRS2SN
               if (chkLog.Checked && bLogAll)
                 oLogging.LogAPRSPacket(oPacket);
 
-              DateTime dtLastReported = new DateTime();
-              HttpResponseMessage oResponse = SendPost(SetupDataForRequest(), Constants.URLS.GET_POSITIONS);
-              if (oResponse.IsSuccessStatusCode)
+              if (oPacket.DataType.Equals(PacketDataType.PositionTime) || oPacket.DataType.Equals(PacketDataType.PositionTimeMsg))
               {
-                string oResult = oResponse.Content.ReadAsStringAsync().Result;
-                Dictionary<string, Dictionary<string, string>[]> dictResponses = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>[]>>(oResult);
-                dtLastReported = DateTime.Parse(dictResponses[Constants.PositionDetailFields.POSITIONS][0][Constants.PositionDetailFields.REPORT_AT]);
-                if (chkLog.Checked && bLogAll)
-                  oLogging.LogHTTPResponse(oResponse);
+                DateTime dtLastReported = new DateTime();
+                HttpResponseMessage oSNPositionResponse = SendPost(SetupDataForRequest(), Constants.URLS.GET_POSITIONS);
+                if (oSNPositionResponse.IsSuccessStatusCode)
+                {
+                  string oResult = oSNPositionResponse.Content.ReadAsStringAsync().Result;
+                  Dictionary<string, Dictionary<string, string>[]> dictResponses = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>[]>>(oResult);
+                  dtLastReported = DateTime.Parse(dictResponses[Constants.PositionDetailFields.POSITIONS][0][Constants.PositionDetailFields.REPORT_AT]);
+                  if (chkLog.Checked && bLogAll)
+                    oLogging.LogHTTPResponse(oSNPositionResponse);
+                }
+                else
+                {
+                  if (chkLog.Checked)
+                    oLogging.LogHTTPResponse(oSNPositionResponse);
+                }
+
+                if (!dtLastReported.Equals(DateTime.MinValue) && !oPacket.TimeStamp.IsLocalTime && oPacket.TimeStamp.TimeStamp < dtLastReported)
+                  continue;
               }
-              else
-              {
-                if (chkLog.Checked)
-                  oLogging.LogHTTPResponse(oResponse);
-              }
-              
-              if (!dtLastReported.Equals(DateTime.MinValue) && !oPacket.TimeStamp.IsLocalTime && oPacket.TimeStamp.TimeStamp < dtLastReported)
-                continue;
 
               if (oPacket.TimeStamp.TimeStamp == null || oPacket.TimeStamp.TimeStamp.Equals(DateTime.MinValue))
                 oPacket.TimeStamp.TimeStamp = DateTime.UtcNow;
 
-              HttpResponseMessage oPositionReponse = SendPost(SetupDataForUpdate(oPacket), Constants.URLS.UPDATE_POSITIONS);
-              if ((!oPositionReponse.IsSuccessStatusCode || bLogAll) && chkLog.Checked)
+              HttpResponseMessage oPositionUpdateReponse = SendPost(SetupDataForUpdate(oPacket), Constants.URLS.UPDATE_POSITIONS);
+              if ((!oPositionUpdateReponse.IsSuccessStatusCode || bLogAll) && chkLog.Checked)
               {
-                oLogging.LogHTTPResponse(oResponse);
+                oLogging.LogHTTPResponse(oPositionUpdateReponse);
               }
             }
           }
           catch (Exception ex)
           {
-            if(chkLog.Checked)
+            if (chkLog.Checked)
               oLogging.LogException(ex);
           }
         }
       }
       nsStream.Close();
-      if(chkLog.Checked)
+      if (chkLog.Checked)
         oLogging.LogInformation("Thread terminated.");
     }
 
@@ -298,7 +302,7 @@ namespace APRS2SN
         {
           bAllSettingsLoaded = true;
         }
-      }      
+      }
     }
 
     /// <summary>
@@ -358,6 +362,17 @@ namespace APRS2SN
               {Constants.PositionDetailFields.ACTIVE, 1},
               {Constants.PositionDetailFields.GPS, 1}
             };
+    }
+
+    /// <summary>
+    /// Handles closing the receive thread and closing the TCP client
+    /// </summary>
+    private void Cleanup()
+    {
+      bRunUpdate = false;
+      Thread.Sleep(1000);
+      thAPRSThread.Join(1000);
+      tcpClient.Close();
     }
   }
 }

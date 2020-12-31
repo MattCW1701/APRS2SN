@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace APRS2SN
+﻿namespace APRS2SN
 {
   class Constants
   {
@@ -12,7 +6,7 @@ namespace APRS2SN
     {
       public static string ConnectTestString(string sCallsign)
       {
-        return $"user {sCallsign} pass -1 vers APRS2SN 1.0 filter r/33.75/-84.25/200\r\n"; 
+        return $"user {sCallsign} pass -1 vers APRS2SN 1.0 filter r/34.75/-85.25/200\r\n"; 
       }
 
       public static string ConnectString(string sCallsign)

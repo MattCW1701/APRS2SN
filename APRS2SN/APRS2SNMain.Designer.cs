@@ -54,9 +54,8 @@
       this.txtDebug.Multiline = true;
       this.txtDebug.Name = "txtDebug";
       this.txtDebug.ReadOnly = true;
-      this.txtDebug.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
       this.txtDebug.Size = new System.Drawing.Size(330, 243);
-      this.txtDebug.TabIndex = 0;
+      this.txtDebug.TabIndex = 5;
       // 
       // lblCallsign
       // 
@@ -122,7 +121,7 @@
       this.menuStrip1.Location = new System.Drawing.Point(0, 0);
       this.menuStrip1.Name = "menuStrip1";
       this.menuStrip1.Size = new System.Drawing.Size(336, 24);
-      this.menuStrip1.TabIndex = 7;
+      this.menuStrip1.TabIndex = 0;
       this.menuStrip1.Text = "menuStrip1";
       // 
       // optionsToolStripMenuItem
@@ -146,7 +145,7 @@
       this.btnStart.Location = new System.Drawing.Point(16, 72);
       this.btnStart.Name = "btnStart";
       this.btnStart.Size = new System.Drawing.Size(75, 23);
-      this.btnStart.TabIndex = 8;
+      this.btnStart.TabIndex = 1;
       this.btnStart.Text = "Start";
       this.btnStart.UseVisualStyleBackColor = true;
       this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
@@ -157,7 +156,7 @@
       this.btnStop.Location = new System.Drawing.Point(98, 71);
       this.btnStop.Name = "btnStop";
       this.btnStop.Size = new System.Drawing.Size(75, 23);
-      this.btnStop.TabIndex = 9;
+      this.btnStop.TabIndex = 2;
       this.btnStop.Text = "Stop";
       this.btnStop.UseVisualStyleBackColor = true;
       this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
@@ -168,7 +167,7 @@
       this.chkLog.Location = new System.Drawing.Point(179, 76);
       this.chkLog.Name = "chkLog";
       this.chkLog.Size = new System.Drawing.Size(64, 17);
-      this.chkLog.TabIndex = 10;
+      this.chkLog.TabIndex = 3;
       this.chkLog.Text = "Logging";
       this.chkLog.UseVisualStyleBackColor = true;
       this.chkLog.CheckedChanged += new System.EventHandler(this.chkLog_CheckedChanged);
@@ -183,7 +182,7 @@
       this.cbLogLevel.Location = new System.Drawing.Point(249, 74);
       this.cbLogLevel.Name = "cbLogLevel";
       this.cbLogLevel.Size = new System.Drawing.Size(82, 21);
-      this.cbLogLevel.TabIndex = 11;
+      this.cbLogLevel.TabIndex = 4;
       this.cbLogLevel.Text = "Errors";
       // 
       // APRS2SN
@@ -206,6 +205,7 @@
       this.MainMenuStrip = this.menuStrip1;
       this.Name = "APRS2SN";
       this.Text = "APRS2SN";
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.APRS2SN_FormClosing);
       this.Shown += new System.EventHandler(this.APRS2SN_Shown);
       this.menuStrip1.ResumeLayout(false);
       this.menuStrip1.PerformLayout();

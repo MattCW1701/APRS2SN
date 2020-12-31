@@ -93,7 +93,7 @@
       this.btnSave.Location = new System.Drawing.Point(123, 119);
       this.btnSave.Name = "btnSave";
       this.btnSave.Size = new System.Drawing.Size(75, 23);
-      this.btnSave.TabIndex = 6;
+      this.btnSave.TabIndex = 4;
       this.btnSave.Text = "Save";
       this.btnSave.UseVisualStyleBackColor = true;
       this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
@@ -104,7 +104,7 @@
       this.txtCommentSearch.Location = new System.Drawing.Point(123, 91);
       this.txtCommentSearch.Name = "txtCommentSearch";
       this.txtCommentSearch.Size = new System.Drawing.Size(100, 20);
-      this.txtCommentSearch.TabIndex = 7;
+      this.txtCommentSearch.TabIndex = 3;
       // 
       // lblComment
       // 
