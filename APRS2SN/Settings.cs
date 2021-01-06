@@ -90,6 +90,7 @@ namespace APRS2SN
         if(!string.IsNullOrWhiteSpace(txtCommentSearch.Text))
           swWriter.WriteLine($"COMMENT:{txtCommentSearch.Text.ToUpper()}");        
       }
+      DialogResult = DialogResult.OK;
       this.Close();
     }
     

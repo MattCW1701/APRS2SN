@@ -55,7 +55,7 @@ namespace APRS2SN
         List<string> lstsLines = new List<string>();
         lstsLines.Add($"{DateTime.UtcNow.ToString(Constants.Utility.DATE_TIME_FORMAT + ".ffffff")}: Received Packet ");
         lstsLines.Add($"Callsign: {oPacket.SourceCallsign.StationCallsign}");
-        lstsLines.Add($"Time: {oPacket.TimeStamp}");
+        lstsLines.Add($"Time: {oPacket.TimeStamp.TimeStamp}");
         lstsLines.Add($"Latitude {oPacket.Position.CoordinateSet.Latitude.Value}");
         lstsLines.Add($"Longitude: {oPacket.Position.CoordinateSet.Longitude.Value}");
         lstsLines.Add($"Elevation: {oPacket.Position.Altitude}");

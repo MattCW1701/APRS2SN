@@ -41,9 +41,11 @@ namespace APRS2SN
     {
       if (File.Exists(Constants.Utility.SETTINGS_FILE))
       {
-        ReadSettingsFile();
-        dtlCallsign.Text = sCallsign;
-        btnStart.Enabled = true;
+        if(ReadSettingsFile())
+        {
+          dtlCallsign.Text = sCallsign;
+          btnStart.Enabled = true;
+        }
       }
       else
       {
@@ -51,8 +53,16 @@ namespace APRS2SN
         switch (oResult)
         {
           case DialogResult.Yes:
-            Settings frmSetting = new Settings();
-            frmSetting.ShowDialog(this);
+            Settings frmSetting = new Settings(Constants.Utility.SETTINGS_FILE);
+            if(frmSetting.ShowDialog(this) == DialogResult.OK)
+            {
+              if(ReadSettingsFile())
+              {
+                dtlCallsign.Text = sCallsign;
+                btnStart.Enabled = true;
+              }
+
+            }
             break;
           case DialogResult.No:
             break;
@@ -139,15 +149,17 @@ namespace APRS2SN
     private void ReadAPRS()
     {
       NetworkStream nsStream = tcpClient.GetStream();
-      AprsPacket oPacket = new AprsPacket();
+      AprsPacket oPacket;
       while (bRunUpdate)
       {
         byte[] yarData = new byte[256];
         if (!nsStream.CanRead || !nsStream.DataAvailable)
           continue;
+          
         int iByteCount = nsStream.Read(yarData, 0, yarData.Length);
         if (iByteCount > 0)
         {
+          oPacket = new AprsPacket();
           string sRead = Encoding.ASCII.GetString(yarData, 0, iByteCount);
           try
           {
@@ -157,10 +169,6 @@ namespace APRS2SN
                                          oPacket.DataType.Equals(PacketDataType.PositionTimeMsg) ||
                                          oPacket.DataType.Equals(PacketDataType.MicE)) && PacketHasSearchComment(oPacket))
             {
-              txtDebug.Invoke(UpdateTextboxDelegate, oPacket);
-              if (chkLog.Checked && bLogAll)
-                oLogging.LogAPRSPacket(oPacket);
-
               if (oPacket.DataType.Equals(PacketDataType.PositionTime) || oPacket.DataType.Equals(PacketDataType.PositionTimeMsg))
               {
                 DateTime dtLastReported = new DateTime();
@@ -185,6 +193,10 @@ namespace APRS2SN
 
               if (oPacket.TimeStamp.TimeStamp == null || oPacket.TimeStamp.TimeStamp.Equals(DateTime.MinValue))
                 oPacket.TimeStamp.TimeStamp = DateTime.UtcNow;
+
+              if (chkLog.Checked && bLogAll)
+                oLogging.LogAPRSPacket(oPacket);
+              txtDebug.Invoke(UpdateTextboxDelegate, oPacket);
 
               HttpResponseMessage oPositionUpdateReponse = SendPost(SetupDataForUpdate(oPacket), Constants.URLS.UPDATE_POSITIONS);
               if ((!oPositionUpdateReponse.IsSuccessStatusCode || bLogAll) && chkLog.Checked)
@@ -227,7 +239,7 @@ namespace APRS2SN
     /// <summary>
     /// Method that reads the settings file
     /// </summary>
-    private void ReadSettingsFile()
+    private bool ReadSettingsFile()
     {
       bool bAllSettingsLoaded = false;
       bool bApplicationIDRead = false, bPublicIdRead = false, bCallsignRead = false, bCommentSearchRead = false;
@@ -293,7 +305,7 @@ namespace APRS2SN
               frmSetting.ShowDialog(this);
               break;
             case DialogResult.No:
-              return;
+              return bApplicationIDRead && bPublicIdRead && bCallsignRead || bCommentSearchRead;
             default:
               break;
           }
@@ -303,6 +315,7 @@ namespace APRS2SN
           bAllSettingsLoaded = true;
         }
       }
+      return true;
     }
 
     /// <summary>
